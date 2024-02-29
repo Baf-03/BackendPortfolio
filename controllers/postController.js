@@ -1,7 +1,7 @@
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const ProjectSchema = require("../model/ProjectSchema");
-require('dotenv').config();
+require("dotenv").config();
 
 const dashboardController = async (req, res) => {
   res.json({
@@ -18,13 +18,32 @@ cloudinary.config({
 });
 
 const UploadImage = async (req, res) => {
+  console.log("howe hit api");
   console.log("files", req.files);
   const urls = [];
+  if (!req.files.length) {
+    res.json({
+      status: true,
+      message: "no new image uploaded",
+      data: null,
+    });
+    return;
+  }
   req.files.forEach((file) => {
+    console.log("------------", file);
     const path = file.path;
+    if (!path) {
+      res.json({
+        status: false,
+        message: "no new image uploaded",
+        data: null,
+      });
+      return;
+    }
     cloudinary.uploader.upload(path, (error, data) => {
       if (error) {
-        fs.unlinkSync(path)
+        console.log("error", error.message);
+        fs.unlinkSync(path);
         return res.json({
           message: "Could not upload image to cloud, try again",
         });
@@ -116,8 +135,16 @@ const findProjectById = async (req, res) => {
 // const updateProjectController = async (req, res) => {};
 
 const updateProjectController = async (req, res) => {
-  const { id, name, shortDetail, liveLink, projectLink, projectImages } = req.body;
-  if (!id || !name || !shortDetail || !liveLink || !projectLink || !projectImages) {
+  const { id, name, shortDetail, liveLink, projectLink, projectImages } =
+    req.body;
+  if (
+    !id ||
+    !name ||
+    !shortDetail ||
+    !liveLink ||
+    !projectLink ||
+    !projectImages
+  ) {
     res.json({
       status: false,
       message: "all fields are required",
@@ -132,7 +159,7 @@ const updateProjectController = async (req, res) => {
     project_link: projectLink,
     project_images: projectImages,
   };
-  console.log("obj",objToSend)
+  console.log("obj", objToSend);
   const updatedProject = await ProjectSchema.findByIdAndUpdate(
     id,
     objToSend,
@@ -153,5 +180,5 @@ module.exports = {
   createProjectController,
   findUserController,
   findProjectById,
-  updateProjectController
+  updateProjectController,
 };
