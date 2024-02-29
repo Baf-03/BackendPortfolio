@@ -1,7 +1,7 @@
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const ProjectSchema = require("../model/ProjectSchema");
-require("dotenv").config();
+require('dotenv').config();
 
 const dashboardController = async (req, res) => {
   res.json({
@@ -18,48 +18,26 @@ cloudinary.config({
 });
 
 const UploadImage = async (req, res) => {
-  res.json({
-    data:null,
-    status:false,
-    message:"api is under Maintanaince"
-  })
-  // console.log("howe hit api");
-  // console.log("files", req.files);
-
-  // if (!req.files || req.files.length === 0) {
-  //   return res.json({
-  //     status: true,
-  //     message: "No new image uploaded",
-  //     data: null,
-  //   });
-  // }
-
-  // const uploadPromises = req.files.map(file => {
-  //   return new Promise((resolve, reject) => {
-  //     cloudinary.uploader.upload(file.path, { folder: 'your-folder-name' }, (error, data) => {
-  //       if (error) {
-  //         console.error("Upload error:", error);
-  //         fs.unlinkSync(file.path);
-  //         return reject("Could not upload image to Cloudinary, try again");
-  //       }
-  //       resolve(data.secure_url);
-  //       fs.unlinkSync(file.path);
-  //     });
-  //   });
-  // });
-
-  // try {
-  //   const urls = await Promise.all(uploadPromises);
-  //   res.json({
-  //     message: "Images uploaded",
-  //     data: urls,
-  //   });
-  // } catch (error) {
-  //   res.json({
-  //     message: error,
-  //     data: null,
-  //   });
-  // }
+  console.log("files", req.files);
+  const urls = [];
+  req.files.forEach((file) => {
+    const path = file.path;
+    cloudinary.uploader.upload(path, (error, data) => {
+      if (error) {
+        return res.json({
+          message: "Could not upload image to cloud, try again",
+        });
+      }
+      urls.push(data.secure_url);
+      if (urls.length === req.files.length) {
+        res.json({
+          message: "Images uploaded",
+          data: urls,
+        });
+      }
+      fs.unlinkSync(path); // Delete the file after successful upload
+    });
+  });
 };
 
 const createProjectController = async (req, res) => {
@@ -137,16 +115,8 @@ const findProjectById = async (req, res) => {
 // const updateProjectController = async (req, res) => {};
 
 const updateProjectController = async (req, res) => {
-  const { id, name, shortDetail, liveLink, projectLink, projectImages } =
-    req.body;
-  if (
-    !id ||
-    !name ||
-    !shortDetail ||
-    !liveLink ||
-    !projectLink ||
-    !projectImages
-  ) {
+  const { id, name, shortDetail, liveLink, projectLink, projectImages } = req.body;
+  if (!id || !name || !shortDetail || !liveLink || !projectLink || !projectImages) {
     res.json({
       status: false,
       message: "all fields are required",
@@ -161,7 +131,7 @@ const updateProjectController = async (req, res) => {
     project_link: projectLink,
     project_images: projectImages,
   };
-  console.log("obj", objToSend);
+  console.log("obj",objToSend)
   const updatedProject = await ProjectSchema.findByIdAndUpdate(
     id,
     objToSend,
@@ -182,5 +152,5 @@ module.exports = {
   createProjectController,
   findUserController,
   findProjectById,
-  updateProjectController,
+  updateProjectController
 };
