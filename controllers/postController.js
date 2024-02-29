@@ -18,43 +18,48 @@ cloudinary.config({
 });
 
 const UploadImage = async (req, res) => {
-  console.log("howe hit api");
-  console.log("files", req.files);
+  res.json({
+    data:null,
+    status:false,
+    message:"api is under Maintanaince"
+  })
+  // console.log("howe hit api");
+  // console.log("files", req.files);
 
-  if (!req.files || req.files.length === 0) {
-    return res.json({
-      status: true,
-      message: "No new image uploaded",
-      data: null,
-    });
-  }
+  // if (!req.files || req.files.length === 0) {
+  //   return res.json({
+  //     status: true,
+  //     message: "No new image uploaded",
+  //     data: null,
+  //   });
+  // }
 
-  const uploadPromises = req.files.map(file => {
-    return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload(file.path, { folder: 'your-folder-name' }, (error, data) => {
-        if (error) {
-          console.error("Upload error:", error);
-          fs.unlinkSync(file.path);
-          return reject("Could not upload image to Cloudinary, try again");
-        }
-        resolve(data.secure_url);
-        fs.unlinkSync(file.path);
-      });
-    });
-  });
+  // const uploadPromises = req.files.map(file => {
+  //   return new Promise((resolve, reject) => {
+  //     cloudinary.uploader.upload(file.path, { folder: 'your-folder-name' }, (error, data) => {
+  //       if (error) {
+  //         console.error("Upload error:", error);
+  //         fs.unlinkSync(file.path);
+  //         return reject("Could not upload image to Cloudinary, try again");
+  //       }
+  //       resolve(data.secure_url);
+  //       fs.unlinkSync(file.path);
+  //     });
+  //   });
+  // });
 
-  try {
-    const urls = await Promise.all(uploadPromises);
-    res.json({
-      message: "Images uploaded",
-      data: urls,
-    });
-  } catch (error) {
-    res.json({
-      message: error,
-      data: null,
-    });
-  }
+  // try {
+  //   const urls = await Promise.all(uploadPromises);
+  //   res.json({
+  //     message: "Images uploaded",
+  //     data: urls,
+  //   });
+  // } catch (error) {
+  //   res.json({
+  //     message: error,
+  //     data: null,
+  //   });
+  // }
 };
 
 const createProjectController = async (req, res) => {
