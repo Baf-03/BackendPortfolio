@@ -20,44 +20,41 @@ cloudinary.config({
 const UploadImage = async (req, res) => {
   console.log("howe hit api");
   console.log("files", req.files);
-  const urls = [];
-  if (!req.files.length) {
-    res.json({
+
+  if (!req.files || req.files.length === 0) {
+    return res.json({
       status: true,
-      message: "no new image uploaded",
+      message: "No new image uploaded",
       data: null,
     });
-    return;
   }
-  req.files.forEach((file) => {
-    console.log("------------", file);
-    const path = file.path;
-    if (!path) {
-      res.json({
-        status: false,
-        message: "no new image uploaded",
-        data: null,
+
+  const uploadPromises = req.files.map(file => {
+    return new Promise((resolve, reject) => {
+      cloudinary.uploader.upload(file.path, { folder: 'your-folder-name' }, (error, data) => {
+        if (error) {
+          console.error("Upload error:", error);
+          fs.unlinkSync(file.path);
+          return reject("Could not upload image to Cloudinary, try again");
+        }
+        resolve(data.secure_url);
+        fs.unlinkSync(file.path);
       });
-      return;
-    }
-    cloudinary.uploader.upload(path, (error, data) => {
-      if (error) {
-        console.log("error", error.message);
-        fs.unlinkSync(path);
-        return res.json({
-          message: "Could not upload image to cloud, try again",
-        });
-      }
-      urls.push(data.secure_url);
-      if (urls.length === req.files.length) {
-        res.json({
-          message: "Images uploaded",
-          data: urls,
-        });
-      }
-      fs.unlinkSync(path); // Delete the file after successful upload
     });
   });
+
+  try {
+    const urls = await Promise.all(uploadPromises);
+    res.json({
+      message: "Images uploaded",
+      data: urls,
+    });
+  } catch (error) {
+    res.json({
+      message: error,
+      data: null,
+    });
+  }
 };
 
 const createProjectController = async (req, res) => {
