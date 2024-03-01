@@ -18,13 +18,32 @@ cloudinary.config({
 });
 
 const UploadImage = async (req, res) => {
+  console.log("howe hit api");
   console.log("files", req.files);
   const urls = [];
+  if (!req.files.length) {
+    res.json({
+      status: true,
+      message: "no new image uploaded",
+      data: null,
+    });
+    return;
+  }
   req.files.forEach((file) => {
+    console.log("------------", file);
     const path = file.path;
+    if (!path) {
+      res.json({
+        status: false,
+        message: "no new image uploaded",
+        data: null,
+      });
+      return;
+    }
     cloudinary.uploader.upload(path, (error, data) => {
       if (error) {
-        fs.unlinkSync(path)
+        console.log("error", error.message);
+        fs.unlinkSync(path);
         return res.json({
           message: "Could not upload image to cloud, try again",
         });
