@@ -24,6 +24,7 @@ const UploadImage = async (req, res) => {
     const path = file.path;
     cloudinary.uploader.upload(path, (error, data) => {
       if (error) {
+        fs.unlinkSync(path)
         return res.json({
           message: "Could not upload image to cloud, try again",
         });
