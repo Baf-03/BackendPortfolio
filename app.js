@@ -4,7 +4,9 @@ const router = require("./router");
 require('dotenv').config();
 const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = process.env.PORT || 3000
+
+
 
 const DB_URI = "mongodb+srv://bilal:bilal@cluster0.gjc8r6r.mongodb.net/mydatabase?retryWrites=true&w=majority";
 mongoose.connect(DB_URI);
@@ -25,7 +27,7 @@ app.post("/", (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
 });
     
